@@ -33,13 +33,19 @@ public class Statistics {
 
     public void install() {
         if (!SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_INSTALL)) {
-            doSendStatistics("",STATUS_INSTALL);
+            doSendStatistics(makeParams("",STATUS_INSTALL));
         }
     }
 
     public void active(String phoneNumber) {
         if (!SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_ACTIVE)) {
-            doSendStatistics(phoneNumber,STATUS_ACTIVE);
+            doSendStatistics(makeParams(phoneNumber,STATUS_ACTIVE));
+        }
+    }
+
+    public void active(String phoneNumber,String referenceCode,String irancellToken){
+        if (!SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_ACTIVE)) {
+            doSendStatistics(makeParams(phoneNumber,STATUS_ACTIVE,referenceCode,irancellToken));
         }
     }
 
@@ -47,29 +53,31 @@ public class Statistics {
         if (SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_ACTIVE) ||
                 SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_INSTALL)
                 ) {
-            doSendStatistics(phoneNumber,STATUS_DEACTIVE);
+            doSendStatistics(makeParams(phoneNumber,STATUS_DEACTIVE));
         }
     }
 
-    private void doSendStatistics(String phoneNumber, final String status) {
+    private void doSendStatistics(
+          final ParamsStatistics params
+    ) {
         ApiStatistics service = WebUtils.getRetrofit().create(ApiStatistics.class);
-        Call<ResponseStatistics> call = service.report(makeParams(phoneNumber, status));
+        Call<ResponseStatistics> call = service.report(params);
         call.enqueue(new Callback<ResponseStatistics>() {
             @Override
             public void onResponse(Call<ResponseStatistics> call, Response<ResponseStatistics> response) {
                 if(response.code()==200){
                     if(response.body().getOk()){
-                        saveStatus(status);
-                    }else if(status.equals(STATUS_DEACTIVE)){
-                        saveStatus(status);
+                        saveStatus(params.getStatus());
+                    }else if(params.getStatus().equals(STATUS_DEACTIVE)){
+                        saveStatus(params.getStatus());
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseStatistics> call, Throwable t) {
-                if(status.equals(STATUS_DEACTIVE)){
-                    saveStatus(status);
+                if(params.getStatus().equals(STATUS_DEACTIVE)){
+                    saveStatus(params.getStatus());
                 }
                 t.printStackTrace();
             }
@@ -89,6 +97,12 @@ public class Statistics {
 
 
     private ParamsStatistics makeParams(String phoneNumber, String status) {
+
+
+        return makeParams(phoneNumber,status,null,null);
+    }
+
+    private ParamsStatistics makeParams(String phoneNumber, String status,String refernceCode,String irancellToken) {
         ApplicationInfo applicationInfo = getContext().getApplicationInfo();
         String appName = applicationInfo.name;
 
@@ -127,6 +141,9 @@ public class Statistics {
         params.setMarketerId(this.marketId);
 
         params.setStatus(status);
+
+        params.setIrancellToken(irancellToken);
+        params.setRefrenceCode(refernceCode);
 
 
         return params;

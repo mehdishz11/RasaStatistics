@@ -12,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        new Statistics(this,2).install();
+        new Statistics(this,2).active("09126421759","123","456");
 
     }
 }
