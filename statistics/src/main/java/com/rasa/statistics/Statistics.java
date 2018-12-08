@@ -39,15 +39,15 @@ public class Statistics {
 
     public void active(String phoneNumber) {
         if (!SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_ACTIVE)) {
-            doSendStatistics("",STATUS_ACTIVE);
+            doSendStatistics(phoneNumber,STATUS_ACTIVE);
         }
     }
 
-    public void deactive() {
+    public void deactive(String phoneNumber) {
         if (SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_ACTIVE) ||
                 SharePrefrences.getValue(getContext(), SharePrefrences.STATIST_KEY_INSTALL)
                 ) {
-            doSendStatistics("",STATUS_DEACTIVE);
+            doSendStatistics(phoneNumber,STATUS_DEACTIVE);
         }
     }
 
